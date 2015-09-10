@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <GL/glew.h>
-#include <GL/glfw3.h>
+#include <GL/glew.h>					// Include GLEW...
+#include <GL/glfw3.h>					// ...before GLFW!
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
 
@@ -22,19 +22,24 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
 	GLFWwindow* window;
-	window = glfwCreateWindow(1024, 768, "Tutorial 01", NULL, NULL);
+	window = glfwCreateWindow(1024, 768, "Tutorial", NULL, NULL);
+	glViewport(0, 0, 1024, 768);
 	
 	if (window == NULL)
 	{
-		fprintf(stderr, "Failed to open GLFW window.\n");
+		fprintf(stderr, "Failed to create GLFW window.\n");
 		glfwTerminate();
 		return -1;
 	}
 
 	glfwMakeContextCurrent(window);
-	glewExperimental = true;
+
+	//--------------------
+
+	glewExperimental = true;		// So GLEW uses more modern techniques for managing OpenGL functionality.
 
 	if (glewInit() != GLEW_OK)
 	{
@@ -70,6 +75,7 @@ int main()
 	do
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glfwPollEvents();
 
 		glUseProgram(programID);
 
@@ -81,8 +87,10 @@ int main()
 		glDisableVertexAttribArray(0);
 
 		glfwSwapBuffers(window);
-		glfwPollEvents();
 
 	} while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
 		glfwWindowShouldClose(window) == 0);
+
+	glfwTerminate();
+	return 0;
 }
