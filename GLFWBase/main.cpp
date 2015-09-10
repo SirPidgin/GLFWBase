@@ -4,6 +4,9 @@
 #include <GL/glew.h>
 #include <GL/glfw3.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp>
+
+#include "loadShader.h"
 
 using namespace glm;
 
@@ -14,7 +17,7 @@ int main()
 		fprintf(stderr, "Failed to initialize GLFW\n");
 		return -1;
 	}
-
+	
 	glfwWindowHint(GLFW_SAMPLES, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -42,7 +45,7 @@ int main()
 	//--------------------
 
 	GLuint VertexArrayID;
-	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
 	glGenVertexArrays(1, &VertexArrayID);
 	glBindVertexArray(VertexArrayID);
 
@@ -62,9 +65,13 @@ int main()
 
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
+	GLuint programID = LoadShaders("VertexShader.txt", "FragmentShader.txt");
+
 	do
 	{
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		glUseProgram(programID);
 
 		glEnableVertexAttribArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
