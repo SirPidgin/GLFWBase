@@ -4,20 +4,23 @@
 #include <iostream>
 
 // Shaders
-const GLchar* vertexShaderSource = 
+const GLchar* vertexShaderSource =
 "#version 330 core\n"
 "layout (location = 0) in vec3 position;\n"
+"out vec4 vertexColor;\n"
 "void main()\n"
 "{\n"
-"gl_Position = vec4(position.x, position.y, position.z, 1.0);\n"
+"gl_Position = vec4(position, 1.0);\n"
+"vertexColor = vec4(0.5f, 0.0f, 1.0f, 1.0f);\n"
 "}\0";
 
-const GLchar* fragmentShaderSource = 
+const GLchar* fragmentShaderSource =
 "#version 330 core\n"
 "out vec4 color;\n"
+"uniform vec4 ourColor;\n"
 "void main()\n"
 "{\n"
-"color = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+"color = ourColor;\n"
 "}\n\0";
 
 int main()
@@ -155,8 +158,13 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		glUseProgram(shaderProgram);
-		glBindVertexArray(vertexArrayObject);
 
+		GLfloat timeValue = glfwGetTime();
+		GLfloat greenValue = (sin(timeValue) / 2) + 0.5;
+		GLint vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
+		glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.4f, 1.0f);
+
+		glBindVertexArray(vertexArrayObject);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 
