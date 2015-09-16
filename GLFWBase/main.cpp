@@ -60,6 +60,13 @@ int main()
 		1, 2, 3						// Second Triangle
 	};
 
+	GLfloat texCoords[] =
+	{
+		0.0f, 0.0f,					// Lower-left corner
+		1.0f, 0.0f,					// Lower-right corner
+		0.5f, 1.0f					// Top-center corner
+	};
+
 	GLuint vertexBufferObject, vertexArrayObject, elementBufferObject;
 	glGenVertexArrays(1, &vertexArrayObject);
 	glGenBuffers(1, &vertexBufferObject);
