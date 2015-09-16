@@ -2,6 +2,7 @@
 #include <GL/glfw3.h>					// ...before GLFW!
 #include <glm/glm.hpp>
 
+#include "lodepng.h"
 #include "Shader.h"
 
 int main()
@@ -13,7 +14,7 @@ int main()
 		std::cout << "Failed to initialize GLFW" << std::endl;
 		return -1;
 	}
-	
+
 	glfwWindowHint(GLFW_SAMPLES, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -48,10 +49,10 @@ int main()
 
 	GLfloat vertices[] =
 	{
-		0.5f, 0.5f, 0.0f,  1.0f, 0.0f, 0.0f,			// Top Right (3 positions, 3 colors)
-		0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,			// Bottom Right (3 positions, 3 colors)
-		-0.5f, -0.5f, 0.0f,	 0.0f, 0.0f, 1.0f,			// Bottom Left (3 positions, 3 colors)
-		-0.5f, 0.5f, 0.0f,  0.5f, 0.0f, 0.5f			// Top Left (3 positions, 3 colors)
+		0.5f, 0.5f, 0.0f,	1.0f, 0.0f, 0.0f,	1.0f, 1.0f,			// Top Right (3 positions, 3 colors, 2 texture coordinates)
+		0.5f, -0.5f, 0.0f,	0.0f, 1.0f, 0.0f,	1.0f, 0.0f,			// Bottom Right
+		-0.5f, -0.5f, 0.0f,	0.0f, 0.0f, 1.0f,	0.0f, 0.0f,			// Bottom Left
+		-0.5f, 0.5f, 0.0f,	0.5f, 0.0f, 0.5f,	0.0f, 1.0f			// Top Left
 	};
 
 	GLuint indices[] =
