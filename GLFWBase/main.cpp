@@ -1,6 +1,8 @@
 #include <GL/glew.h>					// Include GLEW...
 #include <GL/glfw3.h>					// ...before GLFW!
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <vector>
 
 #include "lodepng.h"
@@ -152,6 +154,13 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		ourShader.Use();
+
+		glm::mat4 trans;
+		trans = glm::translate(trans, glm::vec3(sin((GLfloat)glfwGetTime()), cos((GLfloat)glfwGetTime() / 0.5f), 0.0f));
+		trans = glm::rotate(trans, (GLfloat)glfwGetTime() * 5.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+
+		GLuint transformLoc = glGetUniformLocation(ourShader.Program, "transform");
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture1);
