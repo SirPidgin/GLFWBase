@@ -43,5 +43,11 @@
     <Text Include="FragmentShader.txt">
       <Filter>Resource Files</Filter>
     </Text>
+    <Text Include="LightingFragmentShader.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="LightingVertexShader.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>
