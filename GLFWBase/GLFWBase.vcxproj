@@ -87,6 +87,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="lodepng.h" />
     <ClInclude Include="Shader.h" />
   </ItemGroup>

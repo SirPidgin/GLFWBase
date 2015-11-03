@@ -7,10 +7,26 @@
 
 #include "lodepng.h"
 #include "Shader.h"
+#include "Camera.h"
+
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
+void mouseCallback(GLFWwindow* window, double xPos, double yPos);
+void scrollCallback(GLFWwindow* window, double xOffset, double yOffset);
+void doMovement();
+
+const GLuint WIDTH = 1920, HEIGHT = 1080;
+
+GLfloat lastX = WIDTH / 2.0;
+GLfloat lastY = HEIGHT / 2.0;
+
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+bool keys[1024];
+GLfloat deltaTime = 0.0f;
+GLfloat lastFrame = 0.0f;
 
 int main()
 {
-	std::cout << "Starting GLFW context, OpenGL 3.3" << std::endl;
+	std::cout << "Starting GLFW context, OpenGL 3.3.." << std::endl << "Welcome back, commander." << std::endl;
 
 	if (!glfwInit())
 	{
@@ -24,7 +40,7 @@ int main()
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-	GLFWwindow* window = glfwCreateWindow(1920, 1080, "Tutorial", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Tutorial", NULL, NULL);
 	
 	if (window == NULL)
 	{
@@ -34,8 +50,14 @@ int main()
 	}
 
 	glfwMakeContextCurrent(window);
-	glViewport(0, 0, 1920, 1080);
+	glViewport(0, 0, WIDTH, HEIGHT);
 	glEnable(GL_DEPTH_TEST);
+
+	glfwSetKeyCallback(window, keyCallback);
+	glfwSetCursorPosCallback(window, mouseCallback);
+	glfwSetScrollCallback(window, scrollCallback);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
 	//--------------------
 
@@ -95,17 +117,30 @@ int main()
 		-0.5f, 0.5f, -0.5f, 0.0f, 1.0f
 	};
 
-	glm::vec3 cubePositions[] = {
+	/*glm::vec3 cubePositions[] = {
 		glm::vec3(0.0f, 0.0f, 0.0f),
-		glm::vec3(2.0f, 5.0f, -15.0f),
+		glm::vec3(2.0f, 5.0f, -5.0f),
 		glm::vec3(-1.5f, -2.2f, -2.5f),
-		glm::vec3(-3.8f, -2.0f, -12.3f),
-		glm::vec3(2.4f, -0.4f, -3.5f),
+		glm::vec3(-3.8f, -2.0f, 6.3f),
+		glm::vec3(2.4f, -0.4f, 3.5f),
 		glm::vec3(-1.7f, 3.0f, -7.5f),
-		glm::vec3(1.3f, -2.0f, -2.5f),
+		glm::vec3(1.3f, -2.0f, 2.5f),
 		glm::vec3(1.5f, 2.0f, -2.5f),
-		glm::vec3(1.5f, 0.2f, -1.5f),
+		glm::vec3(1.5f, 0.2f, 1.5f),
 		glm::vec3(-1.3f, 1.0f, -1.5f)
+	};*/
+
+	glm::vec3 cubePositions[] = {
+		glm::vec3(-12.0f, 0.0f, 0.0f),
+		glm::vec3(-10.0f, 0.0f, 0.0f),
+		glm::vec3(-8.0f, 0.0f, 0.0f),
+		glm::vec3(-6.0f, 0.0f, 0.0f),
+		glm::vec3(-4.0f, 0.0f, 0.0f),
+		glm::vec3(-2.0f, 0.0f, 0.0f),
+		glm::vec3(0.0f, 0.0f, 0.0f),
+		glm::vec3(2.0f, 0.0f, 0.0f),
+		glm::vec3(4.0f, 0.0f, 0.0f),
+		glm::vec3(6.0f, 0.0f, 0.0f),
 	};
 
 	GLuint vertexBufferObject, vertexArrayObject, elementBufferObject;
@@ -129,7 +164,7 @@ int main()
 	glEnableVertexAttribArray(2);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);				// Unbinds VAO
+	glBindVertexArray(0);
 
 	//--------------------
 
@@ -168,12 +203,6 @@ int main()
 	glGenTextures(1, &texture2);
 	glBindTexture(GL_TEXTURE_2D, texture2);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
 	lodepng::load_file(file, "awesomeface.png");
 	lodepng::decode(pixels, width, height, file.data(), file.size());
 
@@ -185,31 +214,32 @@ int main()
 
 	//--------------------
 
-	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-
 	do
 	{
+		GLfloat currentFrame = glfwGetTime();
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
+
 		glfwPollEvents();
+		doMovement();
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		ourShader.Use();
 
-		glm::mat4 model;
 		glm::mat4 view;
-		glm::mat4 projection;
-		model = glm::rotate(model, (GLfloat)glfwGetTime(), glm::vec3(1.0f, 1.0f, 1.0f));
-		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -2.0f));
-		view = glm::rotate(view, (GLfloat)glfwGetTime() / 3, glm::vec3(0.0f, 1.0f, 0.0f));
-		view = glm::translate(view, glm::vec3(0.0f, 0.0f, 2.0f));
-		projection = glm::perspective(45.0f, (GLfloat)width / (GLfloat)height, 0.1f, 100.0f);
+		//GLfloat radius = 5.0f;
+		//GLfloat camX = sin(glfwGetTime()) * radius;
+		//GLfloat camZ = cos(glfwGetTime()) * radius / 0.5;
+		//view = glm::lookAt(glm::vec3(camX, 5.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+		view = camera.GetViewMatrix();
 
-		GLint modelLoc = glGetUniformLocation(ourShader.Program, "model");
+		glm::mat4 projection;
+		projection = glm::perspective(glm::radians(camera.Zoom), (GLfloat)WIDTH / (GLfloat)HEIGHT, 0.1f, 100.0f);
+
 		GLint viewLoc = glGetUniformLocation(ourShader.Program, "view");
 		GLint projLoc = glGetUniformLocation(ourShader.Program, "projection");
-
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
@@ -227,12 +257,13 @@ int main()
 		glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.4f, 1.0f);*/
 
 		glBindVertexArray(vertexArrayObject);
+		GLint modelLoc = glGetUniformLocation(ourShader.Program, "model");
 		for (GLuint i = 0; i < 10; i++)
 		{
 			glm::mat4 model;
 			model = glm::translate(model, cubePositions[i]);
-			GLfloat angle = 20.0f * i;
-			model = glm::rotate(model, (GLfloat)glfwGetTime() * i  /5.0f, glm::vec3(1.0f, 0.3f, 0.5f));
+			GLfloat angle = 50.0f;
+			model = glm::rotate(model, i * (GLfloat)tan(glfwGetTime() / 10.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 			//model = glm::scale(model, glm::vec3(0.1f * i));
 			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
@@ -251,4 +282,53 @@ int main()
 
 	glfwTerminate();
 	return 0;
+}
+
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mode)
+{
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+		glfwSetWindowShouldClose(window, GL_TRUE);
+
+	if (key >= 0 && key < 1024)
+	{
+		if (action == GLFW_PRESS)
+			keys[key] = true;
+		else if (action == GLFW_RELEASE)
+			keys[key] = false;
+	}
+}
+
+bool firstMouse = true;
+void mouseCallback(GLFWwindow* window, double xPos, double yPos)
+{
+	if (firstMouse)
+	{
+		lastX = xPos;
+		lastY = yPos;
+		firstMouse = false;
+	}
+
+	GLfloat xoffset = xPos - lastX;
+	GLfloat yoffset = lastY - yPos;
+	lastX = xPos;
+	lastY = yPos;
+
+	camera.ProcessMouseMovement(xoffset, yoffset);
+}
+
+void scrollCallback(GLFWwindow* window, double xOffset, double yOffset)
+{
+	camera.ProcessMouseScroll(yOffset);
+}
+
+void doMovement()
+{
+	if (keys[GLFW_KEY_W])
+		camera.ProcessKeyboard(FORWARD, deltaTime);
+	if (keys[GLFW_KEY_S])
+		camera.ProcessKeyboard(BACKWARD, deltaTime);
+	if (keys[GLFW_KEY_A])
+		camera.ProcessKeyboard(LEFT, deltaTime);
+	if (keys[GLFW_KEY_D])
+		camera.ProcessKeyboard(RIGHT, deltaTime);
 }
