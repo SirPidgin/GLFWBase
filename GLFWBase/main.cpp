@@ -16,7 +16,7 @@ void scrollCallback(GLFWwindow* window, double xOffset, double yOffset);
 void doMovement();
 
 // Dimensions
-const GLuint WIDTH = 1920, HEIGHT = 1080;
+const GLuint WIDTH = 1600, HEIGHT = 900;
 
 // Camera
 GLfloat lastX = WIDTH / 2.0;
@@ -33,7 +33,7 @@ glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
 int main()
 {
-	std::cout << "Starting GLFW context, OpenGL 3.3.." << std::endl << "Welcome back, commander." << std::endl;
+	std::cout << "Starting GLFW context, OpenGL 3.3.." << std::endl;
 
 	if (!glfwInit())
 	{
@@ -77,7 +77,7 @@ int main()
 	}
 
 	Shader ourShader("VertexShader.txt", "FragmentShader.txt");
-	Shader lightShader("LightingVertexShader.txt", "LightingFragmentShader.txt");
+	Shader lightShader("LampVertexShader.txt", "LampFragmentShader.txt");
 
 	//--------------------
 
@@ -303,15 +303,51 @@ int main()
 		lightPos.x = 1.0f + sin(glfwGetTime()) * 6.0f;
 		lightPos.y = cos(glfwGetTime() / 2.0f) * 1.0f;
 
+		//--------------------
+
 		ourShader.Use();
-		GLint objectColorLoc = glGetUniformLocation(ourShader.Program, "objectColor");
-		glUniform3f(objectColorLoc, 0.0f, 0.6f, 0.7f);
+
 		GLint lightColorLoc = glGetUniformLocation(ourShader.Program, "lightColor");
-		glUniform3f(lightColorLoc, 1.0f, 0.5f, 1.0f);
-		GLint lightPosLoc = glGetUniformLocation(ourShader.Program, "lightPos");
-		glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
+		GLint lightPosLoc = glGetUniformLocation(ourShader.Program, "light.position");
 		GLint viewPosLoc = glGetUniformLocation(ourShader.Program, "viewPos");
+
+		glUniform3f(lightColorLoc, 1.0f, 0.5f, 1.0f);
+		glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
 		glUniform3f(viewPosLoc, camera.Position.x, camera.Position.y, camera.Position.z);
+
+		//----------
+
+		GLint matAmbientLoc = glGetUniformLocation(ourShader.Program, "material.ambient");
+		GLint matDiffuseLoc = glGetUniformLocation(ourShader.Program, "material.diffuse");
+		GLint matSpecularLoc = glGetUniformLocation(ourShader.Program, "material.specular");
+		GLint matShineLoc = glGetUniformLocation(ourShader.Program, "material.shininess");
+
+		glUniform3f(matAmbientLoc, 0.19225f, 	0.19225f, 	0.19225f);
+		glUniform3f(matDiffuseLoc, 0.50754f, 	0.50754f, 	0.50754f);
+		glUniform3f(matSpecularLoc, 0.508273f, 	0.508273f, 	0.508273f);
+		glUniform1f(matShineLoc, 128.0f * 0.4f);
+
+		//----------
+
+		glm::vec3 lightColor;
+		lightColor.x = sin(glfwGetTime() * 2.0f);
+		lightColor.y = sin(glfwGetTime() * 0.7f);
+		lightColor.z = sin(glfwGetTime() * 1.3f);
+
+		glm::vec3 diffuseColor = lightColor * glm::vec3(1.0f);
+		glm::vec3 ambientColor = diffuseColor * glm::vec3(1.0f);
+
+		GLint lightAmbientLoc = glGetUniformLocation(ourShader.Program, "light.ambient");
+		GLint lightDiffuseLoc = glGetUniformLocation(ourShader.Program, "light.diffuse");
+		GLint lightSpecularLoc = glGetUniformLocation(ourShader.Program, "light.specular");
+
+		//glUniform3f(lightAmbientLoc, ambientColor.x, ambientColor.y, ambientColor.z);
+		//glUniform3f(lightDiffuseLoc, diffuseColor.x, diffuseColor.y, diffuseColor.z);
+		glUniform3f(lightAmbientLoc, 1.0f, 1.0f, 1.0f);
+		glUniform3f(lightDiffuseLoc, 1.0f, 1.0f, 1.0f);
+		glUniform3f(lightSpecularLoc, 1.0f, 1.0f, 1.0f);
+
+		//--------------------
 
 		glm::mat4 view;
 		//GLfloat radius = 5.0f;

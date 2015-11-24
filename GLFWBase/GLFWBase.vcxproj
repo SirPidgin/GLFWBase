@@ -93,8 +93,8 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="FragmentShader.txt" />
-    <Text Include="LightingFragmentShader.txt" />
-    <Text Include="LightingVertexShader.txt" />
+    <Text Include="LampFragmentShader.txt" />
+    <Text Include="LampVertexShader.txt" />
     <Text Include="VertexShader.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

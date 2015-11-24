@@ -43,10 +43,10 @@
     <Text Include="FragmentShader.txt">
       <Filter>Resource Files</Filter>
     </Text>
-    <Text Include="LightingFragmentShader.txt">
+    <Text Include="LampFragmentShader.txt">
       <Filter>Resource Files</Filter>
     </Text>
-    <Text Include="LightingVertexShader.txt">
+    <Text Include="LampVertexShader.txt">
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>
