@@ -280,7 +280,7 @@ int main()
 	glGenTextures(1, &specularMap);
 	glBindTexture(GL_TEXTURE_2D, specularMap);
 
-	lodepng::load_file(file, "container2_specular.png");
+	lodepng::load_file(file, "container2_specular2.png");
 	lodepng::decode(pixels, width, height, file.data(), file.size());
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
@@ -384,7 +384,7 @@ int main()
 			glm::mat4 model;
 			model = glm::translate(model, cubePositions[i]);
 			GLfloat angle = 50.0f;
-			model = glm::rotate(model, i * (GLfloat)sin(glfwGetTime() / 10.0f), glm::vec3(1.0f, 0.2f * i, i));
+			//model = glm::rotate(model, i * (GLfloat)sin(glfwGetTime() / 10.0f), glm::vec3(1.0f, 0.2f * i, i));
 			//model = glm::scale(model, glm::vec3(0.1f * i));
 			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
